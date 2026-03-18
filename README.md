@@ -1,1 +1,0 @@
-# Simple-Expense-Tracker-CPP

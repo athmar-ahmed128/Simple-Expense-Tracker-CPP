@@ -1,0 +1,75 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <fstream>
+#include <iomanip>
+
+using namespace std;
+
+struct Expense {
+    string description;
+    double amount;
+};
+
+void showMenu() {
+    cout << "\n===============================" << endl;
+    cout << "   PERSONAL EXPENSE TRACKER   " << endl;
+    cout << "===============================" << endl;
+    cout << "1. Add New Expense" << endl;
+    cout << "2. View All Expenses" << endl;
+    cout << "3. Show Total Spending" << endl;
+    cout << "4. Clear All Data" << endl;
+    cout << "5. Exit" << endl;
+    cout << "-------------------------------" << endl;
+    cout << "Choose an option (1-5): ";
+}
+
+int main() {
+    vector<Expense> expenses;
+    int choice;
+    string desc;
+    double amt;
+
+    ifstream readFile("expenses.txt");
+    if (readFile.is_open()) {
+        while (readFile >> desc >> amt) {
+            expenses.push_back({desc, amt});
+        }
+        readFile.close();
+    }
+
+    while (true) {
+        showMenu();
+        cin >> choice;
+
+        if (choice == 1) {
+            cout << "Enter expense description: ";
+            cin >> desc;
+            cout << "Enter amount: ";
+            cin >> amt;
+            expenses.push_back({desc, amt});
+            ofstream writeFile("expenses.txt", ios::app);
+            writeFile << desc << " " << amt << endl;
+            writeFile.close();
+            cout << "Success: Added!" << endl;
+        } else if (choice == 2) {
+            if (expenses.empty()) cout << "No records found." << endl;
+            else {
+                cout << "\n--- Expense List ---" << endl;
+                for (const auto& e : expenses) cout << "- " << e.description << ": " << e.amount << "$" << endl;
+            }
+        } else if (choice == 3) {
+            double total = 0;
+            for (const auto& e : expenses) total += e.amount;
+            cout << "\nTotal Spending: " << total << "$" << endl;
+        } else if (choice == 4) {
+            expenses.clear();
+            ofstream clearFile("expenses.txt", ios::trunc);
+            clearFile.close();
+            cout << "Data cleared." << endl;
+        } else if (choice == 5) {
+            break;
+        }
+    }
+    return 0;
+}

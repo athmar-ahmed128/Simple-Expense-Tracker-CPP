@@ -30,9 +30,10 @@ int main() {
     string desc;
     double amt;
 
+    // قراءة البيانات مع معالجة ثغرة المسافات
     ifstream readFile("expenses.txt");
     if (readFile.is_open()) {
-        while (readFile >> desc >> amt) {
+        while (readFile >> ws && getline(readFile, desc, ',') && readFile >> amt) {
             expenses.push_back({desc, amt});
         }
         readFile.close();
@@ -40,23 +41,37 @@ int main() {
 
     while (true) {
         showMenu();
-        cin >> choice;
+        if (!(cin >> choice)) { // حماية البرنامج من إدخال حروف بدلاً من أرقام
+            cin.clear();
+            cin.ignore(1000, '\n');
+            continue;
+        }
 
         if (choice == 1) {
-            cout << "Enter expense description: ";
-            cin >> desc;
+            cout << "Enter expense description (can include spaces): ";
+            cin >> ws; // تنظيف الـ Buffer لقراءة النص بشكل صحيح
+            getline(cin, desc); // تعديل الثغرة: قراءة السطر كاملاً حتى مع المسافات
+            
             cout << "Enter amount: ";
             cin >> amt;
+            
             expenses.push_back({desc, amt});
+            
+            // الحفظ باستخدام الفاصلة (,) للفصل بين الوصف والرقم لضمان القراءة الصحيحة لاحقاً
             ofstream writeFile("expenses.txt", ios::app);
-            writeFile << desc << " " << amt << endl;
+            writeFile << desc << "," << amt << endl;
             writeFile.close();
             cout << "Success: Added!" << endl;
+            
         } else if (choice == 2) {
             if (expenses.empty()) cout << "No records found." << endl;
             else {
                 cout << "\n--- Expense List ---" << endl;
-                for (const auto& e : expenses) cout << "- " << e.description << ": " << e.amount << "$" << endl;
+                cout << left << setw(20) << "Item" << "Price" << endl;
+                cout << "-------------------------------" << endl;
+                for (const auto& e : expenses) {
+                    cout << left << setw(20) << e.description << e.amount << "$" << endl;
+                }
             }
         } else if (choice == 3) {
             double total = 0;
@@ -73,4 +88,3 @@ int main() {
     }
     return 0;
 }
-
